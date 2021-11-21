@@ -20,3 +20,5 @@ python compute_dataset_statistics.py ../datasets/BST/processed/task1/train-noisy
 # From codes/
 python train.py -opt confs/1_bst_task1.yml
 python train.py -opt confs/2_bst_task1.yml
+python train.py -opt confs/3_bst_task1.yml --model_path ../trained_models/DeFlow_models/DeFlow-AIM-RWSR-100k.pth
+python train.py -opt confs/4_bst_task1.yml --model_path ../trained_models/DeFlow_models/DeFlow-AIM-RWSR-100k.pth
