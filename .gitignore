@@ -9,6 +9,10 @@
 /trash/
 /Real-SR/
 
+!datasets/*.sh
+!datasets/*.py
+!trained_models/*.sh
+
 *.pyc
 
 # Byte-compiled / optimized / DLL files
