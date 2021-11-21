@@ -161,7 +161,7 @@ def main():
                 train_sampler = torch.utils.data.WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
             else:
                 train_sampler = None
-            # 
+            #
             train_loader = create_dataloader(train_set, dataset_opt, opt, train_sampler)
             if rank <= 0:
                 logger.info('Number of train images: {:,d}, iters: {:,d}'.format(
@@ -186,11 +186,11 @@ def main():
     if args.model_path is not None:
         assert resume_state is None
         state_dict = torch.load(args.model_path, map_location=model.device)
-        
+
         model_to_load = model.netG
         if hasattr(model_to_load, "module"):
             model_to_load = model_to_load.module
-        
+
         # Handle unexpected keys
         model_keys = set(model_to_load.state_dict().keys())
         state_dict_keys = set(state_dict.keys())
@@ -235,7 +235,7 @@ def main():
         timerData.tick()
         for _, train_data in enumerate(train_loader):
             timerData.tock()
-            
+
             current_step += 1
             if current_step <= total_iters:
 
@@ -245,10 +245,10 @@ def main():
                 #### update learning rate
                 model.update_learning_rate(current_step, warmup_iter=opt['train']['warmup_iter'])
                 nll = None
-                
+
                 nll = model.optimize_parameters(current_step)
 
-                    
+
 
                 if nll is None:
                     nll = 0
@@ -287,11 +287,11 @@ def main():
                         # os.system(f"chmod -Rc 775 {os.path.join(opt['path']['val_images'],'/../')}")
 
             # validation
-            if ((current_step % opt['train']['val_freq'] == 0) 
-                    or current_step == total_iters + 1) and rank <= 0: # current_step == 1 or 
+            if ((current_step % opt['train']['val_freq'] == 0)
+                    or current_step == total_iters + 1) and rank <= 0: # current_step == 1 or
                 flatten = lambda l: [item for sublist in l for item in sublist]
                 labels = flatten(opt_get(opt, ['network_G', 'flow', 'shift', 'classes'], [[0,1]]))
-                
+
                 print("validating...")
                 avg_psnr = 0.0
                 avg_ssim = 0.0
@@ -299,8 +299,8 @@ def main():
 
                 label_psnr = {l: 0.0 for l in labels}
                 label_ssim = {l: 0.0 for l in labels}
-                label_lpips = {l: 0.0 for l in labels} 
-                label_nll = {l: 0.0 for l in labels}                    
+                label_lpips = {l: 0.0 for l in labels}
+                label_nll = {l: 0.0 for l in labels}
 
                 label_occurences = {l: 0 for l in labels} # only tracks occurences for idx < n_visual
                 label_occurences_all = {l: 0 for l in labels}
@@ -310,6 +310,7 @@ def main():
                 n_visual = 20
 
                 for idx, val_data in enumerate(val_loader):
+                    print(f"Processing: {idx}/{len(val_loader)}")
                     model.feed_data(val_data)
 
                     nll, epses, y_label = model.test()
@@ -329,7 +330,7 @@ def main():
                         # need seperate statistics for each class !!!
                         epses_dict.setdefault(y_label[0].item(), [])
                         epses_dict[y_label[0].item()].append(epses)
-                    
+
                     if idx < n_visual:
                         img_name = os.path.splitext(os.path.basename(val_data['LQ_path'][0]))[0]
                         img_dir = os.path.join(opt['path']['val_images'], img_name)
@@ -348,7 +349,7 @@ def main():
                                                                     '{:s}_{:09d}_h{:03d}_source{:d}_target{:d}_s{:d}.png'.format(img_name,
                                                                                                             current_step,
                                                                                                             int(heat * 100),
-                                                                                                            y_label[0], 
+                                                                                                            y_label[0],
                                                                                                             y_label_target,
                                                                                                             i))
                                         util.save_img(sr_img, save_img_path)
@@ -376,12 +377,12 @@ def main():
                                                         '{:s}_GT.png'.format(img_name))
                         if not os.path.isfile(save_img_path_gt):
                             util.save_img(gt_img, save_img_path_gt)
-                    
+
                     # calculate PSNR
                     sr_img = util.tensor2img(
                         model.get_sr_with_z(lq=val_data['LQ'], z=None, heat=1.0, y_label=y_label)
                     )
-                    gt_img = util.tensor2img(val_data['GT']) 
+                    gt_img = util.tensor2img(val_data['GT'])
 
                     crop_size = opt['scale']
                     gt_img = gt_img / 255. # seems redundant as we multiply by 255 again...
@@ -432,14 +433,14 @@ def main():
                     tb_logger_valid.add_scalar(f'loss/nll_label{l}', avg_label_nll[l], current_step)
                     tb_logger_valid.add_scalar(f'loss/psnr_label{l}', avg_label_psnr[l], current_step)
                     tb_logger_valid.add_scalar(f'loss/ssim_label{l}', avg_label_ssim[l], current_step)
-                    tb_logger_valid.add_scalar(f'loss/lpips_label{l}', avg_label_lpips[l], current_step)                
+                    tb_logger_valid.add_scalar(f'loss/lpips_label{l}', avg_label_lpips[l], current_step)
 
                 tb_logger_train.flush()
                 tb_logger_valid.flush()
 
             if current_step >= total_iters:
                 break
-            
+
             timerData.tick()
 
         if current_step >= total_iters:
@@ -451,7 +452,7 @@ def main():
         model.save('latest')
         logger.info('End of training.')
 
- 
+
 
 if __name__ == '__main__':
     main()

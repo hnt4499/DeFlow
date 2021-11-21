@@ -44,7 +44,6 @@ if __name__ == "__main__":
     dataset_opt['center_crop_hr_size'] = args.crop_size
     dataset_opt['n_max'] = args.n_max
     dataset_opt['preload'] = False
-    print(dataset_opt)
 
     val_set = create_dataset(dataset_opt)
     val_loader = create_dataloader(val_set, dataset_opt, opt, None)
@@ -62,7 +61,6 @@ if __name__ == "__main__":
         lq, gt, labels = val_data['LQ'], val_data['GT'], val_data['y_label']
 
         lq, gt, labels = lq.to(device), gt.to(device), labels.to(device)
-        print(f"lq: {lq.shape}, gt: {gt.shape}")
 
         fn = val_data['GT_path'][0].split('/')[-1][:-4]
         save_path = os.path.join(args.out_dir, '{}_to_{}/{}_original.png'.format(labels.item(), 1-labels.item(),fn))
@@ -75,7 +73,6 @@ if __name__ == "__main__":
 
         # translate latents zs and decode
         translated = model.get_translate_with_zs(zs=zs, lq=gt, source_labels=labels, lr_enc=lr_enc, heat=1.0)
-        print(f"zs: {[i.shape for i in zs]}, translated: {translated.shape}")
         save_path = os.path.join(args.out_dir,
                                     '{}_to_{}/{}_translated.png'.format(labels.item(), 1-labels.item(),fn))
         denormalize_f = denormalize_domY if labels[0] == 0 else lambda x: x

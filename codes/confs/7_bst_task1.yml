@@ -1,9 +1,11 @@
+# Same as 5_bst_task1 but downscale training clean images (as done in DeFlow-AIM-RWSR)
+
 #### general settings
-name: DeFlow-AIM-RWSR
+name: 7_bst_task1
 use_tb_logger: true
 model: SRFL_Glow
 distortion: sr
-scale: 8
+scale: 4
 gpu_ids: [0,] # should be equal to $CUDA_VISIBLE_DEVICES
 
 
@@ -13,10 +15,10 @@ datasets:
     name: train
     mode: LQGT_multiclass
     # use create_train_dataset.py to create downsampled datasets
-    dataroot_GT: [../datasets/AIM-RWSR/train-clean-images/4x/,  # DIV2k clean 4x, (336x504)
-                  ../datasets/AIM-RWSR/train-noisy-images/1x/]  # AIM19 noisy 1x, (1520x2040)
-    dataroot_LQ: [../datasets/AIM-RWSR/train-clean-images/32x/, # DIV2k clean 16x, (42x63)
-                  ../datasets/AIM-RWSR/train-noisy-images/8x/]  # AIM19 noisy 4x, (190x255)
+    dataroot_GT: [../datasets/AIM-RWSR/train-clean-images/4x/,             # DIV2k clean 4x, (336x504)
+                  ../datasets/BST/processed/task1/train-noisy-images/1x/]  # BST noisy 1x, (256x256)
+    dataroot_LQ: [../datasets/AIM-RWSR/train-clean-images/16x/,             # DIV2k clean 4x, (84x126)
+                  ../datasets/BST/processed/task1/train-noisy-images/4x/]  # BST noisy 4x, (56x56)
     n_workers: 3  # per GPU
     preload: true # set true to load images into ram for faster training
     batch_size: 8
@@ -29,38 +31,38 @@ datasets:
     quant: 32
     alignment: 8
     normalize: # chanel-wise statistics over domains and lr/hr [values are precomputed]
-      mean_noisy_hr: [120.71678252, 115.66740282, 104.7566205]
-      std_noisy_hr: [54.14952531, 52.60073718, 55.64991431]
-      mean_noisy_lr: [120.71671803, 115.66735471, 104.75649595]
-      std_noisy_lr: [50.67423609, 49.07204813, 52.3704119]
+      mean_noisy_hr: [117.88748611, 109.4048288, 97.64644714]
+      std_noisy_hr: [70.1809656, 66.55224778, 69.63500642]
+      mean_noisy_lr: [117.89211426, 109.40988525, 97.6532251]
+      std_noisy_lr: [67.73001317, 64.23605864, 66.6646184]
 
-      mean_clean_hr: [114.47609804, 111.67182033, 103.29093697]
-      std_clean_hr: [59.98190873, 57.2422813,  59.9127576]
-      mean_clean_lr: [114.36107384, 111.57875743, 103.19098391]
-      std_clean_lr: [53.36256634, 50.91536884, 54.04613198]
+      mean_clean_hr: [114.69150172, 111.67491841, 103.26490806]
+      std_clean_hr: [70.6325031, 67.0257846, 72.95698077]
+      mean_clean_lr: [114.69200255, 111.67554671, 103.2653292]
+      std_clean_lr: [67.5507876, 64.03802138, 70.35148608]
 
   val:
     name: val
     mode: LQGT_multiclass
-    dataroot_GT: [../datasets/AIM-RWSR/valid-gt-clean/4x/,    # DIV2k clean 4x, (336x504)
-                  ../datasets/AIM-RWSR/valid-input-noisy/1x/] # AIM19 noisy 1x, (336x504) (same images as clean 4x - DIV2k)
-    dataroot_LQ: [../datasets/AIM-RWSR/valid-gt-clean/32x/,   # DIV2k clean 16x, (42x63)
-                  ../datasets/AIM-RWSR/valid-input-noisy/8x/] # AIM19 noisy 4x, (42x63)  (same images as clean 16x - DIV2k)
+    dataroot_GT: [../datasets/BST/processed/task1/val-gt-clean/2x/,    # BST clean 2x
+                  ../datasets/BST/processed/task1/val-input-noisy/1x/] # BST noisy 1x
+    dataroot_LQ: [../datasets/BST/processed/task1/val-gt-clean/8x/,    # BST clean 8x
+                  ../datasets/BST/processed/task1/val-input-noisy/4x/] # BST noisy 4x
     preload: true # set true to load images into ram for faster training
     center_crop_hr_size: 160
     quant: 32
-    n_max: 5
+    n_max:
     alignment: 8
     normalize:
-      mean_noisy_hr: [120.71678252, 115.66740282, 104.7566205 ]
-      std_noisy_hr: [54.14952531, 52.60073718, 55.64991431]
-      mean_noisy_lr: [120.71671803, 115.66735471, 104.75649595]
-      std_noisy_lr: [50.67423609, 49.07204813, 52.3704119 ]
+      mean_noisy_hr: [117.88748611, 109.4048288, 97.64644714]
+      std_noisy_hr: [70.1809656, 66.55224778, 69.63500642]
+      mean_noisy_lr: [117.89211426, 109.40988525, 97.6532251]
+      std_noisy_lr: [67.73001317, 64.23605864, 66.6646184]
 
-      mean_clean_hr: [114.47609804, 111.67182033, 103.29093697]
-      std_clean_hr: [59.98190873, 57.2422813,  59.9127576]
-      mean_clean_lr: [114.36107384, 111.57875743, 103.19098391]
-      std_clean_lr: [53.36256634, 50.91536884, 54.04613198]
+      mean_clean_hr: [114.69150172, 111.67491841, 103.26490806]
+      std_clean_hr: [70.6325031, 67.0257846, 72.95698077]
+      mean_clean_lr: [114.69200255, 111.67554671, 103.2653292]
+      std_clean_lr: [67.5507876, 64.03802138, 70.35148608]
 
 #### network structures
 network_G:
@@ -69,7 +71,7 @@ network_G:
   out_nc: 3
   nf: 64
   nb: 23
-  upscale: 8
+  upscale: 4
   train_RRDB: true
 
   flow:
@@ -98,7 +100,7 @@ network_G:
 #### path
 path:
   root: ../ # training results & checkpoints are saved in {root}/experiments
-  pretrain_model_G: ../trained_models/RRDB_models/RRDB_PSNR_x8.pth
+  pretrain_model_G: ../trained_models/RRDB_models/RRDB_PSNR_x4.pth
   strict_load: true
   resume_state: auto # starts training from last checkpoint if one exists
 
