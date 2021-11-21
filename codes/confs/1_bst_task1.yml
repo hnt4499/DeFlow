@@ -1,0 +1,138 @@
+# Main differences with "DeFlow-AIM-RWSR" includes:
+# 1. Different training dataset and dataset statistics. In particular, I replace noisy training
+#   set with the one given in this assignment. For low-quality and high-quality subsets
+#   I chose to downsample with scales 1x and 4x.
+# 2. `batch_size=32`. The number of training iterations is scaled accordingly. However,
+#   learning rate is remains the same since I observe that it depends on training datasets
+#   and hence requires manual tuning. Given the time constraint, I chose to keep the default
+#   learning rate instead.
+# 3. `scale=4` and `GT_size=center_crop_hr_size=80` because the size of 256x256 is small.
+
+#### general settings
+name: 1_bst_task1
+use_tb_logger: true
+model: SRFL_Glow
+distortion: sr
+scale: 4
+gpu_ids: [0,1] # should be equal to $CUDA_VISIBLE_DEVICES
+
+
+#### datasets
+datasets:
+  train:
+    name: train
+    mode: LQGT_multiclass
+    # use create_train_dataset.py to create downsampled datasets
+    dataroot_GT: [../datasets/AIM-RWSR/train-clean-images/4x/,             # DIV2k clean 4x
+                  ../datasets/BST/processed/task1/train-noisy-images/1x/]  # BST noisy 1x
+    dataroot_LQ: [../datasets/AIM-RWSR/train-clean-images/16x/,            # DIV2k clean 16x
+                  ../datasets/BST/processed/task1/train-noisy-images/4x/]  # BST noisy 4x
+    n_workers: 3  # per GPU
+    preload: false # set true to load images into ram for faster training
+    batch_size: 128
+    balanced: true
+    use_shuffle: true
+    use_flip: true
+    use_crop: true
+    color: RGB
+    GT_size: 80
+    quant: 32
+    alignment: 8
+    normalize: # chanel-wise statistics over domains and lr/hr [values are precomputed]
+      mean_noisy_hr: [117.88748611, 109.4048288, 97.64644714]
+      std_noisy_hr: [70.1809656, 66.55224778, 69.63500642]
+      mean_noisy_lr: [117.89211426, 109.40988525, 97.6532251]
+      std_noisy_lr: [67.73001317, 64.23605864, 66.6646184]
+
+      mean_clean_hr: [114.69150172, 111.67491841, 103.26490806]
+      std_clean_hr: [70.6325031, 67.0257846, 72.95698077]
+      mean_clean_lr: [114.69200255, 111.67554671, 103.2653292]
+      std_clean_lr: [67.5507876,  64.03802138, 70.35148608]
+
+  val:
+    name: val
+    mode: LQGT_multiclass
+    dataroot_GT: [../datasets/BST/processed/task1/val-gt-clean/2x/,    # BST clean 2x
+                  ../datasets/BST/processed/task1/val-input-noisy/1x/] # BST noisy 1x
+    dataroot_LQ: [../datasets/BST/processed/task1/val-gt-clean/8x/,    # BST clean 8x
+                  ../datasets/BST/processed/task1/val-input-noisy/4x/] # BST noisy 4x
+    preload: false # set true to load images into ram for faster training
+    center_crop_hr_size: 80
+    quant: 32
+    n_max:
+    alignment: 8
+    normalize:
+      mean_noisy_hr: [117.88748611, 109.4048288, 97.64644714]
+      std_noisy_hr: [70.1809656, 66.55224778, 69.63500642]
+      mean_noisy_lr: [117.89211426, 109.40988525, 97.6532251]
+      std_noisy_lr: [67.73001317, 64.23605864, 66.6646184]
+
+      mean_clean_hr: [114.69150172, 111.67491841, 103.26490806]
+      std_clean_hr: [70.6325031, 67.0257846, 72.95698077]
+      mean_clean_lr: [114.69200255, 111.67554671, 103.2653292]
+      std_clean_lr: [67.5507876,  64.03802138, 70.35148608]
+
+#### network structures
+network_G:
+  which_model_G: RRDBGlowNet
+  in_nc: 3
+  out_nc: 3
+  nf: 64
+  nb: 23
+  upscale: 4
+  train_RRDB: true
+
+  flow:
+    K: 16
+    L: 3
+    noInitialInj: true
+    LU_decomposed: true
+    coupling: CondAffineSeparatedAndCond
+    additionalFlowNoAffine: 2
+    split:
+      enable: true
+    fea_up0: true
+    stackRRDB:
+      blocks: [1, 8, 15, 22]
+      concat: true
+    shift:
+      constant: correlated
+      classes: [[0,1],]
+      std_init_shift: 0.0
+    LR_noise_std: 0.03
+    CondAffineSeparatedAndCond:
+      eps: 0.001
+      multReverse: True
+      hidden_channels: 128
+
+#### path
+path:
+  root: ../ # training results & checkpoints are saved in {root}/experiments
+  pretrain_model_G: ../trained_models/RRDB_models/RRDB_PSNR_x4.pth
+  strict_load: true
+  resume_state: auto # starts training from last checkpoint if one exists
+
+#### training settings: learning rate scheme, loss
+train:
+  manual_seed: 10
+  lr_G: !!float 1.0e-4
+  weight_decay_G: 0
+  beta1: 0.9
+  beta2: 0.99
+  lr_scheme: MultiStepLR
+  warmup_iter: -1  # no warm up
+  lr_steps_rel: [0.5, 0.75, 0.9, 0.95]
+  lr_gamma: 0.5
+
+  niter: 10000
+  val_freq: 200
+
+#### validation settings
+val:
+  heats: [1.0]
+  n_sample: 1
+
+#### logger
+logger:
+  print_freq: 5
+  save_checkpoint_freq: 200
