@@ -1,0 +1,109 @@
+# Same as `9_bst_task1` but using 4x bigger images
+
+#### general settings
+name: 11_bst_task1
+use_tb_logger: true
+model: SRFL_Glow
+distortion: sr
+scale: 4
+gpu_ids: [0,] # should be equal to $CUDA_VISIBLE_DEVICES
+
+
+#### datasets
+datasets:
+  train:
+    name: train
+    mode: LQGT_multiclass 
+    ## we do not use the given high quality images 
+    ## as we found that the scenes are too different
+    ## instead we treat 4x downsampled low-quality images as the high quality images  
+    dataroot_GT: [../datasets/BST/processed/task1/train-noisy-images/1x/,     # 256x256
+                  ../datasets/BST/processed/task1/train-noisy-images/0.25x/]  # 1024x1024
+    dataroot_LQ: [../datasets/BST/processed/task1/train-noisy-images/4x/,     # 64x64
+                  ../datasets/BST/processed/task1/train-noisy-images/1x/]     # 256x256
+    n_workers: 3  # per GPU
+    preload: true # set true to load images into ram for faster training
+    batch_size: 48
+    balanced: True
+    use_shuffle: true
+    use_flip: true
+    use_crop: true
+    color: RGB
+    GT_size: 80
+    quant: 32
+    
+  val:
+    name: val
+    mode: LQGT_multiclass 
+    dataroot_GT: [../datasets/BST/processed/task1/val-input-noisy/4x/,   # 64x64
+                  ../datasets/BST/processed/task1/val-input-noisy/1x/]   # 256x256
+    dataroot_LQ: [../datasets/BST/processed/task1/val-input-noisy/16x/,  # 16x16
+                  ../datasets/BST/processed/task1/val-input-noisy/4x/]   # 64x64
+    preload: true # set true to load images into ram for faster training
+    center_crop_hr_size: 64
+    quant: 32
+    n_max: 10
+
+#### network structures
+network_G:
+  which_model_G: RRDBGlowNet
+  in_nc: 3
+  out_nc: 3
+  nf: 64
+  nb: 23
+  upscale: 4
+  train_RRDB: true
+
+  flow:
+    K: 16
+    L: 3
+    noInitialInj: true
+    LU_decomposed: true
+    coupling: CondAffineSeparatedAndCond
+    additionalFlowNoAffine: 2
+    split:
+      enable: true
+    fea_up0: true
+    stackRRDB:
+      blocks: [1, 8, 15, 22]
+      concat: true
+    shift:
+      constant: correlated
+      classes: [[0,1], ]
+      std_init_shift: 0.0
+    LR_noise_std: 0.03
+    CondAffineSeparatedAndCond:
+      eps: 0.001
+      multReverse: True
+
+#### path
+path:
+  root: ../
+  pretrain_model_G: ../trained_models/RRDB_models/RRDB_PSNR_x4.pth
+  strict_load: true
+  resume_state: auto
+
+#### training settings: learning rate scheme, loss
+train:
+  manual_seed: 10
+  lr_G: !!float 0.5e-5
+  weight_decay_G: 0
+  beta1: 0.9
+  beta2: 0.99
+  lr_scheme: MultiStepLR
+  warmup_iter: -1  # no warm up
+  lr_steps_rel: [0.5, 0.75, 0.9, 0.95]
+  lr_gamma: 0.5
+
+  niter: 100000
+  val_freq: 5000
+
+#### validation settings
+val:
+  heats: [1.0]
+  n_sample: 1
+
+#### logger
+logger:
+  print_freq: 100
+  save_checkpoint_freq: !!float 5e3

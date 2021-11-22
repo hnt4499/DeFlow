@@ -1,7 +1,7 @@
-# Except same as `2_bst_task1.yml`, except for `val_freq` and `save_checkpoint_freq`.
+# Exactly same as `1_bst_task1.yml`, except for `val_freq` and `save_checkpoint_freq`
 
 #### general settings
-name: 4_bst_task1
+name: 3_bst_task1
 use_tb_logger: true
 model: SRFL_Glow
 distortion: sr
@@ -15,10 +15,10 @@ datasets:
     name: train
     mode: LQGT_multiclass
     # use create_train_dataset.py to create downsampled datasets
-    dataroot_GT: [../datasets/BST/processed/task1/train-noisy-images/1x/,  # BST noisy 1x
+    dataroot_GT: [../datasets/AIM-RWSR/train-clean-images/4x/,             # DIV2k clean 4x
+                  ../datasets/BST/processed/task1/train-noisy-images/1x/]  # BST noisy 1x
+    dataroot_LQ: [../datasets/AIM-RWSR/train-clean-images/16x/,            # DIV2k clean 16x
                   ../datasets/BST/processed/task1/train-noisy-images/4x/]  # BST noisy 4x
-    dataroot_LQ: [../datasets/BST/processed/task1/train-noisy-images/4x/,  # BST noisy 4x
-                  ../datasets/BST/processed/task1/train-noisy-images/16x/] # BST noisy 16x
     n_workers: 3  # per GPU
     preload: false # set true to load images into ram for faster training
     batch_size: 128
@@ -27,9 +27,19 @@ datasets:
     use_flip: true
     use_crop: true
     color: RGB
-    GT_size: 40
+    GT_size: 80
     quant: 32
     alignment: 8
+    # normalize: # chanel-wise statistics over domains and lr/hr [values are precomputed]
+    #   mean_noisy_hr: [117.88748611, 109.4048288, 97.64644714]
+    #   std_noisy_hr: [70.1809656, 66.55224778, 69.63500642]
+    #   mean_noisy_lr: [117.89211426, 109.40988525, 97.6532251]
+    #   std_noisy_lr: [67.73001317, 64.23605864, 66.6646184]
+
+    #   mean_clean_hr: [114.69150172, 111.67491841, 103.26490806]
+    #   std_clean_hr: [70.6325031, 67.0257846, 72.95698077]
+    #   mean_clean_lr: [114.69200255, 111.67554671, 103.2653292]
+    #   std_clean_lr: [67.5507876,  64.03802138, 70.35148608]
 
   val:
     name: val
@@ -39,10 +49,20 @@ datasets:
     dataroot_LQ: [../datasets/BST/processed/task1/val-gt-clean/8x/,    # BST clean 8x
                   ../datasets/BST/processed/task1/val-input-noisy/4x/] # BST noisy 4x
     preload: false # set true to load images into ram for faster training
-    center_crop_hr_size: 40
+    center_crop_hr_size: 80
     quant: 32
     n_max:
     alignment: 8
+    # normalize:
+    #   mean_noisy_hr: [117.88748611, 109.4048288, 97.64644714]
+    #   std_noisy_hr: [70.1809656, 66.55224778, 69.63500642]
+    #   mean_noisy_lr: [117.89211426, 109.40988525, 97.6532251]
+    #   std_noisy_lr: [67.73001317, 64.23605864, 66.6646184]
+
+    #   mean_clean_hr: [114.69150172, 111.67491841, 103.26490806]
+    #   std_clean_hr: [70.6325031, 67.0257846, 72.95698077]
+    #   mean_clean_lr: [114.69200255, 111.67554671, 103.2653292]
+    #   std_clean_lr: [67.5507876,  64.03802138, 70.35148608]
 
 #### network structures
 network_G:

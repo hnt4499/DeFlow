@@ -10,12 +10,22 @@ sys.path.insert(0, '../codes')
 from data.util import is_image_file, load_at_multiple_scales
 
 
+def to_integer(x, eps=1e-8):
+    x_int = round(x)
+    if abs(x - x_int) < eps:
+        return x_int
+    return x
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-source_dir', required=True, help='path to directory containing HR images')
     parser.add_argument('-target_dir', required=True, help='path to target directory')
-    parser.add_argument('-scales', nargs='+',  type=int, default=[1, 4], help='scales to downsample to')
+    parser.add_argument('-scales', nargs='+',  type=float, default=[1, 4], help='scales to downsample/upsample to')
     args = parser.parse_args()
+
+    # Handle scales
+    args.scales = [to_integer(scale) for scale in args.scales]
 
     source_dir = args.source_dir
 
