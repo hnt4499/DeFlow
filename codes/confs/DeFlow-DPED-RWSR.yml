@@ -11,14 +11,14 @@ gpu_ids: [0,] # should be equal to $CUDA_VISIBLE_DEVICES
 datasets:
   train:
     name: CelebA_160_tr
-    mode: LQGT_multiclass 
-    ## we do not use the given high quality images 
+    mode: LQGT_multiclass
+    ## we do not use the given high quality images
     ## as we found that the scenes are too different
-    ## instead we treat 4x downsampled low-quality images as the high quality images  
-    dataroot_GT: [../datasets/DPED-RWSR/DPEDiphone-tr-x/4x/, 
-                  ../datasets/DPED-RWSR/DPEDiphone-tr-x/1x/]
-    dataroot_LQ: [../datasets/DPED-RWSR/DPEDiphone-tr-x/16x/, 
-                  ../datasets/DPED-RWSR/DPEDiphone-tr-x/4x/]
+    ## instead we treat 4x downsampled low-quality images as the high quality images
+    dataroot_GT: [../datasets/DPED-RWSR/DPEDiphone-tr-x/4x/,  # (384, 512)
+                  ../datasets/DPED-RWSR/DPEDiphone-tr-x/1x/]  # (1536, 2048)
+    dataroot_LQ: [../datasets/DPED-RWSR/DPEDiphone-tr-x/16x/,  # (96, 128)
+                  ../datasets/DPED-RWSR/DPEDiphone-tr-x/4x/]  # (384, 512)
     n_workers: 3  # per GPU
     preload: False # set true to load images into ram for faster training
     batch_size: 48
@@ -29,13 +29,13 @@ datasets:
     color: RGB
     GT_size: 80
     quant: 32
-    
+
   val:
     name: CelebA_160_va
-    mode: LQGT_multiclass 
-    dataroot_GT: [../datasets/DPED-RWSR/DPEDiphone-va/4x/, 
+    mode: LQGT_multiclass
+    dataroot_GT: [../datasets/DPED-RWSR/DPEDiphone-va/4x/,
                   ../datasets/DPED-RWSR/DPEDiphone-va/1x/]
-    dataroot_LQ: [../datasets/DPED-RWSR/DPEDiphone-va/16x/, 
+    dataroot_LQ: [../datasets/DPED-RWSR/DPEDiphone-va/16x/,
                   ../datasets/DPED-RWSR/DPEDiphone-va/4x/]
     preload: False # set true to load images into ram for faster training
     center_crop_hr_size: 160
@@ -76,7 +76,7 @@ network_G:
 
 #### path
 path:
-  root: /srv/beegfs02/scratch/data_aim2019/data/STValentin/ 
+  root: /srv/beegfs02/scratch/data_aim2019/data/STValentin/
   pretrain_model_G: /srv/beegfs02/scratch/data_aim2019/data/STValentin/models/RRDB_PSNR_x4.pth #/srv/beegfs02/scratch/data_aim2019/data/STValentin/models/SrgDf2kRRDB23X4Qn32_K16_L3_sp_CondAffineSeparatedAndCond_FlowNoAff2_n200000_fullDSNoRot_lr25e-5s05s075s09s095_RrdbD05_RRDBStack4_latest_G.pth #
   strict_load: true
   resume_state: auto
