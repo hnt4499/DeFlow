@@ -8,6 +8,8 @@
 *_delete_*
 /trash/
 /Real-SR/
+translate/
+translate_2x/
 
 !datasets/*.sh
 !datasets/*.py

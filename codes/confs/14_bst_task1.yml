@@ -1,14 +1,11 @@
-# Same as DeFlow-AIM-RWSR but replace dataset with the given dataset
-# This should be very similar to `7_bst_task1` as well, except:
-# 1. Scale (8 vs. 4)
-# 2. Mean and std values (here we keep the same as in `DeFlow-AIM-RWSR`)
+# Same as `8_bst_task1` but using scale=4
 
 #### general settings
-name: 8_bst_task1
+name: 14_bst_task1
 use_tb_logger: true
 model: SRFL_Glow
 distortion: sr
-scale: 8
+scale: 4
 gpu_ids: [0,] # should be equal to $CUDA_VISIBLE_DEVICES
 
 
@@ -20,8 +17,8 @@ datasets:
     # use create_train_dataset.py to create downsampled datasets
     dataroot_GT: [../datasets/AIM-RWSR/train-clean-images/4x/,  # DIV2k clean 4x, (336x504)
                   ../datasets/BST/processed/task1/train-noisy-images/1x/]  # BST noisy 1x, (256x256)
-    dataroot_LQ: [../datasets/AIM-RWSR/train-clean-images/32x/, # DIV2k clean 32x, (42x63)
-                  ../datasets/BST/processed/task1/train-noisy-images/8x/]  # BST noisy 8x, (32x32)
+    dataroot_LQ: [../datasets/AIM-RWSR/train-clean-images/16x/, # DIV2k clean 16x, (84x126)
+                  ../datasets/BST/processed/task1/train-noisy-images/4x/]  # BST noisy 4x, (64x64)
     n_workers: 3  # per GPU
     preload: true # set true to load images into ram for faster training
     batch_size: 8
@@ -49,8 +46,8 @@ datasets:
     mode: LQGT_multiclass
     dataroot_GT: [../datasets/BST/processed/task1/val-gt-clean/2x/,    # BST clean 2x
                   ../datasets/BST/processed/task1/val-input-noisy/1x/] # BST noisy 1x
-    dataroot_LQ: [../datasets/BST/processed/task1/val-gt-clean/16x/,    # BST clean 8x
-                  ../datasets/BST/processed/task1/val-input-noisy/8x/] # BST noisy 4x
+    dataroot_LQ: [../datasets/BST/processed/task1/val-gt-clean/8x/,    # BST clean 8x
+                  ../datasets/BST/processed/task1/val-input-noisy/4x/] # BST noisy 4x
     preload: true # set true to load images into ram for faster training
     center_crop_hr_size: 160
     quant: 32
@@ -74,7 +71,7 @@ network_G:
   out_nc: 3
   nf: 64
   nb: 23
-  upscale: 8
+  upscale: 4
   train_RRDB: true
 
   flow:
@@ -103,7 +100,7 @@ network_G:
 #### path
 path:
   root: ../ # training results & checkpoints are saved in {root}/experiments
-  pretrain_model_G: ../trained_models/RRDB_models/RRDB_PSNR_x8.pth
+  pretrain_model_G: ../trained_models/RRDB_models/RRDB_PSNR_x4.pth
   strict_load: true
   resume_state: auto # starts training from last checkpoint if one exists
 

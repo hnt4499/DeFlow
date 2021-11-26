@@ -1,5 +1,6 @@
 import argparse
 import os
+from shutil import copyfile
 
 from tqdm import tqdm
 import torch
@@ -36,20 +37,23 @@ if __name__ == "__main__":
         mean_clean_hr = np.asarray(opt['datasets']['train']['normalize']['mean_clean_hr'])/255
         std_clean_hr = np.asarray(opt['datasets']['train']['normalize']['std_clean_hr'])/255
         denormalize_domY = lambda x: (((x - mean_clean_hr)/std_clean_hr)*std_noisy_hr) + mean_noisy_hr
-        
-    else: 
+
+    else:
         denormalize_domY = lambda x: x
-    
+
     for fn in tqdm(sorted(os.listdir(args.source_dir))):
         if not is_image_file(fn):
             continue
-        
+
+        # Copy original file for reference
+        copyfile(os.path.join(args.source_dir, fn), os.path.join(args.out_dir,fn))
+
         gt, lq = load_at_multiple_scales(os.path.join(args.source_dir,fn), scales=[1, opt['scale']], as_tensor=True)
         labels = torch.Tensor([0]) if args.source_domain == 'X' else torch.Tensor([1])
         lq, gt, labels = lq.to(device), gt.to(device), labels.to(device)
 
         # precomute conditional encoding s.t. conditional features are fixed!
-        lr_enc = model.netG.module.rrdbPreprocessing(lq) 
+        lr_enc = model.netG.module.rrdbPreprocessing(lq)
 
         # endcode
         zs, nll = model.get_encode_z_and_nll(lq=lq, gt=gt, y_label=labels, lr_enc=lr_enc, add_gt_noise=add_gt_noise, epses=[])
@@ -57,5 +61,7 @@ if __name__ == "__main__":
         # translate latents zs and decode
         translated = model.get_translate_with_zs(zs=zs, lq=lq, source_labels=labels, lr_enc=lr_enc, heat=1.0)
 
-        save_path = os.path.join(args.out_dir, fn)
+        name, ext = os.path.splitext(fn)
+        fn_translated = f"{name}.translated{ext}"
+        save_path = os.path.join(args.out_dir, fn_translated)
         imageio.imwrite(save_path, rgb(translated, denormalize_domY))

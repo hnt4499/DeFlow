@@ -1,10 +1,7 @@
-# Same as DeFlow-AIM-RWSR but replace dataset with the given dataset
-# This should be very similar to `7_bst_task1` as well, except:
-# 1. Scale (8 vs. 4)
-# 2. Mean and std values (here we keep the same as in `DeFlow-AIM-RWSR`)
+# Same as `8_bst_task1` but using upscaled noisy images.
 
 #### general settings
-name: 8_bst_task1
+name: 12_bst_task1
 use_tb_logger: true
 model: SRFL_Glow
 distortion: sr
@@ -19,9 +16,9 @@ datasets:
     mode: LQGT_multiclass
     # use create_train_dataset.py to create downsampled datasets
     dataroot_GT: [../datasets/AIM-RWSR/train-clean-images/4x/,  # DIV2k clean 4x, (336x504)
-                  ../datasets/BST/processed/task1/train-noisy-images/1x/]  # BST noisy 1x, (256x256)
+                  ../datasets/BST/processed/task1/train-noisy-images/0.5x/]  # BST noisy 0.5x, (512x512)
     dataroot_LQ: [../datasets/AIM-RWSR/train-clean-images/32x/, # DIV2k clean 32x, (42x63)
-                  ../datasets/BST/processed/task1/train-noisy-images/8x/]  # BST noisy 8x, (32x32)
+                  ../datasets/BST/processed/task1/train-noisy-images/4x/]  # BST noisy 4x, (64x64)
     n_workers: 3  # per GPU
     preload: true # set true to load images into ram for faster training
     batch_size: 8

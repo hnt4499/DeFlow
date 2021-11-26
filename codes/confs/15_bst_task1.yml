@@ -1,10 +1,7 @@
-# Same as DeFlow-AIM-RWSR but replace dataset with the given dataset
-# This should be very similar to `7_bst_task1` as well, except:
-# 1. Scale (8 vs. 4)
-# 2. Mean and std values (here we keep the same as in `DeFlow-AIM-RWSR`)
+# Same as `8_bst_task1` but using custom normalization values
 
 #### general settings
-name: 8_bst_task1
+name: 15_bst_task1
 use_tb_logger: true
 model: SRFL_Glow
 distortion: sr
@@ -34,15 +31,15 @@ datasets:
     quant: 32
     alignment: 8
     normalize: # chanel-wise statistics over domains and lr/hr [values are precomputed]
-      mean_noisy_hr: [120.71678252, 115.66740282, 104.7566205]
-      std_noisy_hr: [54.14952531, 52.60073718, 55.64991431]
-      mean_noisy_lr: [120.71671803, 115.66735471, 104.75649595]
-      std_noisy_lr: [50.67423609, 49.07204813, 52.3704119]
+      mean_noisy_hr: [117.88748611, 109.4048288, 97.64644714]
+      std_noisy_hr: [70.1809656, 66.55224778, 69.63500642]
+      mean_noisy_lr: [117.89141602, 109.40889648, 97.6509375 ]
+      std_noisy_lr: [65.56253036, 62.15119827, 64.61089313]
 
-      mean_clean_hr: [114.47609804, 111.67182033, 103.29093697]
-      std_clean_hr: [59.98190873, 57.2422813,  59.9127576]
-      mean_clean_lr: [114.36107384, 111.57875743, 103.19098391]
-      std_clean_lr: [53.36256634, 50.91536884, 54.04613198]
+      mean_clean_hr: [114.69150172, 111.67491841, 103.26490806]
+      std_clean_hr: [70.6325031, 67.0257846, 72.95698077]
+      mean_clean_lr: [114.69280773, 111.67589019, 103.26432346]
+      std_clean_lr: [65.26659743, 61.88217135, 68.44474713]
 
   val:
     name: val
@@ -57,15 +54,15 @@ datasets:
     n_max: 5
     alignment: 8
     normalize:
-      mean_noisy_hr: [120.71678252, 115.66740282, 104.7566205 ]
-      std_noisy_hr: [54.14952531, 52.60073718, 55.64991431]
-      mean_noisy_lr: [120.71671803, 115.66735471, 104.75649595]
-      std_noisy_lr: [50.67423609, 49.07204813, 52.3704119 ]
+      mean_noisy_hr: [117.88748611, 109.4048288, 97.64644714]
+      std_noisy_hr: [70.1809656, 66.55224778, 69.63500642]
+      mean_noisy_lr: [117.89141602, 109.40889648, 97.6509375 ]
+      std_noisy_lr: [65.56253036, 62.15119827, 64.61089313]
 
-      mean_clean_hr: [114.47609804, 111.67182033, 103.29093697]
-      std_clean_hr: [59.98190873, 57.2422813,  59.9127576]
-      mean_clean_lr: [114.36107384, 111.57875743, 103.19098391]
-      std_clean_lr: [53.36256634, 50.91536884, 54.04613198]
+      mean_clean_hr: [114.69150172, 111.67491841, 103.26490806]
+      std_clean_hr: [70.6325031, 67.0257846, 72.95698077]
+      mean_clean_lr: [114.69280773, 111.67589019, 103.26432346]
+      std_clean_lr: [65.26659743, 61.88217135, 68.44474713]
 
 #### network structures
 network_G:
