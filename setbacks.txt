@@ -1,0 +1,3 @@
+1. The two sets of experiments (on clean: Div2K, noisy: given and clean: given, noisy: given) have test-time crop sizes. Hence, it is not possible to directly compare the performance of these two sets of experiments and do model selection based on validation performance. Solution: evaluate end-to-end performance (x2 super resolution).
+2. Realized that validation takes quite a long time -> increase validation frequency
+3. Realized that the code only keeps three most recent checkpoints -> take the best out of these three checkpoints.
