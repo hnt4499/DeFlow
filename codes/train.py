@@ -200,7 +200,7 @@ def main():
             for key in unexpected_keys:
                 del state_dict[key]
 
-        model_to_load.load_state_dict(state_dict)
+        model_to_load.load_state_dict(state_dict, strict=True)
         logger.info(f"Successfully loaded state dict from {args.model_path}")
 
     #### resume training

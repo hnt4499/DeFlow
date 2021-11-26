@@ -20,6 +20,7 @@ if __name__ == "__main__":
     parser.add_argument('-source_dir', required=True, default=None, help='save directory of translated images')
     parser.add_argument('-out_dir', required=True, default=None, help='save directory of translated images')
     parser.add_argument('-source_domain', default="X", help='save directory of translated images')
+    parser.add_argument('--no_orig', default=False, action="store_true", help='whether not to save the original images')
     add_gt_noise = True # apply quantization noise
     args = parser.parse_args()
 
@@ -46,7 +47,8 @@ if __name__ == "__main__":
             continue
 
         # Copy original file for reference
-        copyfile(os.path.join(args.source_dir, fn), os.path.join(args.out_dir,fn))
+        if not args.no_orig:
+            copyfile(os.path.join(args.source_dir, fn), os.path.join(args.out_dir,fn))
 
         gt, lq = load_at_multiple_scales(os.path.join(args.source_dir,fn), scales=[1, opt['scale']], as_tensor=True)
         labels = torch.Tensor([0]) if args.source_domain == 'X' else torch.Tensor([1])
@@ -62,6 +64,6 @@ if __name__ == "__main__":
         translated = model.get_translate_with_zs(zs=zs, lq=lq, source_labels=labels, lr_enc=lr_enc, heat=1.0)
 
         name, ext = os.path.splitext(fn)
-        fn_translated = f"{name}.translated{ext}"
+        fn_translated = f"{name}.translated{ext}" if not args.no_orig else fn
         save_path = os.path.join(args.out_dir, fn_translated)
         imageio.imwrite(save_path, rgb(translated, denormalize_domY))
