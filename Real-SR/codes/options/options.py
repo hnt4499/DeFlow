@@ -26,15 +26,27 @@ def parse(opt_path, is_train=True):
             dataset['scale'] = scale
         is_lmdb = False
         if dataset.get('dataroot_GT', None) is not None:
-            dataset['dataroot_GT'] = osp.expanduser(dataset['dataroot_GT'])
-            if dataset['dataroot_GT'].endswith('lmdb'):
-                is_lmdb = True
+            dataroot_GT = dataset['dataroot_GT']
+            if isinstance(dataroot_GT, str):
+                dataset['dataroot_GT'] = osp.expanduser(dataroot_GT)
+                if dataset['dataroot_GT'].endswith('lmdb'):
+                    is_lmdb = True
+            else:
+                dataset['dataroot_GT'] = [osp.expanduser(p) for p in dataroot_GT]
+                if dataset['dataroot_GT'][0].endswith('lmdb'):
+                    is_lmdb = True
         # if dataset.get('dataroot_GT_bg', None) is not None:
         #     dataset['dataroot_GT_bg'] = osp.expanduser(dataset['dataroot_GT_bg'])
         if dataset.get('dataroot_LQ', None) is not None:
-            dataset['dataroot_LQ'] = osp.expanduser(dataset['dataroot_LQ'])
-            if dataset['dataroot_LQ'].endswith('lmdb'):
-                is_lmdb = True
+            dataroot_LQ = dataset['dataroot_LQ']
+            if isinstance(dataroot_LQ, str):
+                dataset['dataroot_LQ'] = osp.expanduser(dataroot_LQ)
+                if dataset['dataroot_LQ'].endswith('lmdb'):
+                    is_lmdb = True
+            else:
+                dataset['dataroot_LQ'] = [osp.expanduser(p) for p in dataroot_LQ]
+                if dataset['dataroot_LQ'][0].endswith('lmdb'):
+                    is_lmdb = True
         dataset['data_type'] = 'lmdb' if is_lmdb else 'img'
         if dataset['mode'].endswith('mc'):  # for memcached
             dataset['data_type'] = 'mc'

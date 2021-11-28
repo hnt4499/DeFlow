@@ -23,8 +23,35 @@ class LQGTDataset(data.Dataset):
         self.sizes_LQ, self.sizes_GT = None, None
         self.LQ_env, self.GT_env = None, None  # environment for lmdb
 
-        self.paths_GT, self.sizes_GT = util.get_image_paths(self.data_type, opt['dataroot_GT'])
-        self.paths_LQ, self.sizes_LQ = util.get_image_paths(self.data_type, opt['dataroot_LQ'])
+        paths_GT, sizes_GT = [], []
+        dataroot_GT = opt["dataroot_GT"]
+        if isinstance(dataroot_GT, str):
+            dataroot_GT = [dataroot_GT]
+        
+        for dataroot_GT_i in dataroot_GT:
+            path_GT, size_GT = util.get_image_paths(self.data_type, dataroot_GT_i)
+            paths_GT += path_GT
+            if size_GT is not None:
+                sizes_GT += size_GT
+        
+        self.paths_GT = paths_GT
+        self.sizes_GT = sizes_GT if len(sizes_GT) > 0 else None
+
+        paths_LQ, sizes_LQ = [], []
+        dataroot_LQ = opt["dataroot_LQ"]
+        if isinstance(dataroot_LQ, str):
+            dataroot_LQ = [dataroot_LQ]
+        
+        for dataroot_LQ_i in dataroot_LQ:
+            path_LQ, size_LQ = util.get_image_paths(self.data_type, dataroot_LQ_i)
+            paths_LQ += path_LQ
+            if size_LQ is not None:
+                sizes_LQ += size_LQ
+        
+        self.paths_LQ = paths_LQ
+        self.sizes_LQ = sizes_LQ if len(sizes_LQ) > 0 else None
+        
+        
         assert self.paths_GT, 'Error: GT path is empty.'
         if self.paths_LQ and self.paths_GT:
             assert len(self.paths_LQ) == len(

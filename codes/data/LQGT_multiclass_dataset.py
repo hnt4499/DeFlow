@@ -66,8 +66,31 @@ class LQGTMulticlassDataset(data.Dataset):
         self.y_labels = []
 
         for class_i, (root_GT, root_LQ) in enumerate(zip(dataroot_GT, dataroot_LQ)):
-            paths_GT, sizes_GT = util.get_image_paths(self.data_type, root_GT)
-            paths_LQ, sizes_LQ = util.get_image_paths(self.data_type, root_LQ)
+            # `root_GT` and `root_LQ` could also be a list of paths
+            if isinstance(root_GT, str):
+                root_GT = [root_GT]
+            if isinstance(root_LQ, str):
+                root_LQ = [root_LQ]
+
+            paths_GT, sizes_GT = [], []
+            for root_GT_i in root_GT:
+                path_GT, size_GT = util.get_image_paths(self.data_type, root_GT_i)
+                paths_GT += path_GT
+                if size_GT is not None:
+                    sizes_GT += size_GT
+            
+            if len(sizes_GT) == 0:
+                sizes_GT = None
+    
+            paths_LQ, sizes_LQ = [], []
+            for root_LQ_i in root_LQ:
+                path_LQ, size_LQ = util.get_image_paths(self.data_type, root_LQ_i)
+                paths_LQ += path_LQ
+                if size_LQ is not None:
+                    sizes_LQ += size_LQ
+            
+            if len(sizes_LQ) == 0:
+                sizes_LQ = None
 
             assert paths_GT, 'Error: GT path is empty.'
             assert paths_LQ, 'Error: LQ path is empty on the fly downsampling not yet supported.'

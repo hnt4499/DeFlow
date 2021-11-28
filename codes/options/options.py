@@ -27,7 +27,13 @@ def parse(opt_path, is_train=True):
         is_lmdb = False
         if dataset.get('dataroot_GT', None) is not None:
             if type(dataset['dataroot_GT']) == list:
-                dataset['dataroot_GT'] = [osp.expanduser(p) for p in dataset['dataroot_GT']]
+                dataroot_GT = []
+                for path in dataset["dataroot_GT"]:
+                    if isinstance(path, str):
+                        dataroot_GT.append(osp.expanduser(path))
+                    else:
+                        dataroot_GT.append([osp.expanduser(p) for p in path])
+                dataset['dataroot_GT'] = dataroot_GT
             else: 
                 dataset['dataroot_GT'] = osp.expanduser(dataset['dataroot_GT'])
                 if dataset['dataroot_GT'].endswith('lmdb'):
@@ -35,8 +41,14 @@ def parse(opt_path, is_train=True):
         # if dataset.get('dataroot_GT_bg', None) is not None:
         #     dataset['dataroot_GT_bg'] = osp.expanduser(dataset['dataroot_GT_bg'])
         if dataset.get('dataroot_LQ', None) is not None:
-            if type(dataset['dataroot_GT']) == list:
-                dataset['dataroot_LQ'] = [osp.expanduser(p) for p in dataset['dataroot_LQ']]
+            if type(dataset['dataroot_LQ']) == list:
+                dataroot_LQ = []
+                for path in dataset["dataroot_LQ"]:
+                    if isinstance(path, str):
+                        dataroot_LQ.append(osp.expanduser(path))
+                    else:
+                        dataroot_LQ.append([osp.expanduser(p) for p in path])
+                dataset['dataroot_LQ'] = dataroot_LQ
             else: 
                 dataset['dataroot_LQ'] = osp.expanduser(dataset['dataroot_LQ'])
                 if dataset['dataroot_LQ'].endswith('lmdb'):

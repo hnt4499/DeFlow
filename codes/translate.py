@@ -30,13 +30,17 @@ if __name__ == "__main__":
     opt = option.parse("confs/" + args.opt, is_train=True)
     device = model.netG.module.mean_shift.device
 
-
-    if 'normalize' in opt['datasets']['train']:
+    if "train" in opt["datasets"]:
+        t = "train"
+    else:
+        t = "train_0"
+    
+    if 'normalize' in opt['datasets'][t]:
         assert args.source_domain == 'X', 'only source_domain X supported atm when normalization is applied (as done in the AIM-RWSR DeFlow model)'
-        mean_noisy_hr = np.asarray(opt['datasets']['train']['normalize']['mean_noisy_hr'])/255
-        std_noisy_hr = np.asarray(opt['datasets']['train']['normalize']['std_noisy_hr'])/255
-        mean_clean_hr = np.asarray(opt['datasets']['train']['normalize']['mean_clean_hr'])/255
-        std_clean_hr = np.asarray(opt['datasets']['train']['normalize']['std_clean_hr'])/255
+        mean_noisy_hr = np.asarray(opt['datasets'][t]['normalize']['mean_noisy_hr'])/255
+        std_noisy_hr = np.asarray(opt['datasets'][t]['normalize']['std_noisy_hr'])/255
+        mean_clean_hr = np.asarray(opt['datasets'][t]['normalize']['mean_clean_hr'])/255
+        std_clean_hr = np.asarray(opt['datasets'][t]['normalize']['std_clean_hr'])/255
         denormalize_domY = lambda x: (((x - mean_clean_hr)/std_clean_hr)*std_noisy_hr) + mean_noisy_hr
 
     else:

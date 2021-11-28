@@ -51,11 +51,12 @@ if __name__ == "__main__":
     val_set = create_dataset(dataset_opt)
     val_loader = create_dataloader(val_set, dataset_opt, opt, None)
 
-    if 'normalize' in opt['datasets']['train']:
-        mean_noisy_hr = np.asarray(opt['datasets']['train']['normalize']['mean_noisy_hr'])/255
-        std_noisy_hr = np.asarray(opt['datasets']['train']['normalize']['std_noisy_hr'])/255
-        mean_clean_hr = np.asarray(opt['datasets']['train']['normalize']['mean_clean_hr'])/255
-        std_clean_hr = np.asarray(opt['datasets']['train']['normalize']['std_clean_hr'])/255
+    t = "train" if "train" in opt['datasets'] else "train_0"
+    if 'normalize' in opt['datasets'][t]:
+        mean_noisy_hr = np.asarray(opt['datasets'][t]['normalize']['mean_noisy_hr'])/255
+        std_noisy_hr = np.asarray(opt['datasets'][t]['normalize']['std_noisy_hr'])/255
+        mean_clean_hr = np.asarray(opt['datasets'][t]['normalize']['mean_clean_hr'])/255
+        std_clean_hr = np.asarray(opt['datasets'][t]['normalize']['std_clean_hr'])/255
         denormalize_domY = lambda x: (((x - mean_clean_hr)/std_clean_hr)*std_noisy_hr) + mean_noisy_hr
     else:
         denormalize_domY = lambda x: x

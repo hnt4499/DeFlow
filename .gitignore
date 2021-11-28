@@ -8,6 +8,7 @@
 *_delete_*
 /trash/
 translate/
+translated/
 translate_2x/
 
 !datasets/*.sh
