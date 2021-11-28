@@ -10,7 +10,7 @@ datasets:
   test_1:  # the 1st test dataset
     name: bst_task1_noisy
     mode: LQGT
-    dataroot_LR: ../../datasets/BST/processed/task1/val-input-noisy/1x/
+    dataroot_LQ: ../../datasets/BST/processed/task1/val-input-noisy/1x/
     dataroot_GT: ../../datasets/BST/processed/task1/val-gt-clean/1x/
   test_2:  # the 2st test dataset
     name: bst_task2_noisy
@@ -28,4 +28,4 @@ network_G:
 
 #### path
 path:
-  pretrain_model_G: ../experiments/1_bst_task/models/latest_G.pth
+  pretrain_model_G: ../experiments/1_bst_task2/models/latest_G.pth
