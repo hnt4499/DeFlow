@@ -1,0 +1,27 @@
+name: 8_bst_task1
+suffix: ~  # add suffix to saved images
+model: srgan
+distortion: sr
+scale: 2
+crop_border: ~  # crop border when evaluation. If None(~), crop the scale pixels
+gpu_ids: [0]
+
+datasets:
+  test_1:  # the 1st test dataset
+    name: bst_task1_noisy
+    mode: LQGT
+    dataroot_LR: ../../datasets/BST/processed/task1/val-input-noisy/1x/
+    dataroot_GT: ../../datasets/BST/processed/task1/val-gt-clean/1x/
+
+#### network structures
+network_G:
+  which_model_G: RRDBNet
+  in_nc: 3
+  out_nc: 3
+  nf: 64
+  nb: 23
+  upscale: 4
+
+#### path
+path:
+  pretrain_model_G: ../experiments/8_bst_task1/models/latest_G.pth

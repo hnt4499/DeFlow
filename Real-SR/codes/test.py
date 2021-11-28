@@ -10,6 +10,11 @@ from data.util import bgr2ycbcr
 from data import create_dataset, create_dataloader
 from models import create_model
 
+import sys
+sys.path.append("../../codes")
+import MeasureLib
+
+
 #### options
 parser = argparse.ArgumentParser()
 parser.add_argument('-opt', type=str, required=True, help='Path to options YMAL file.')
@@ -43,6 +48,7 @@ for test_loader in test_loaders:
     test_results = OrderedDict()
     test_results['psnr'] = []
     test_results['ssim'] = []
+    test_results['lpips'] = []
     test_results['psnr_y'] = []
     test_results['ssim_y'] = []
 
@@ -74,6 +80,9 @@ for test_loader in test_loaders:
         # calculate PSNR and SSIM
         if need_GT:
             gt_img = util.tensor2img(visuals['GT'])
+            save_img_path = osp.join(dataset_dir, img_name + '_GT' + '.png')
+            util.save_img(gt_img, save_img_path)
+            
             gt_img = gt_img / 255.
             sr_img = sr_img / 255.
 
@@ -84,11 +93,14 @@ for test_loader in test_loaders:
             else:
                 cropped_sr_img = sr_img[crop_border:-crop_border, crop_border:-crop_border, :]
                 cropped_gt_img = gt_img[crop_border:-crop_border, crop_border:-crop_border, :]
-
-            psnr = util.calculate_psnr(cropped_sr_img * 255, cropped_gt_img * 255)
-            ssim = util.calculate_ssim(cropped_sr_img * 255, cropped_gt_img * 255)
+            
+            psnr, ssim, lpips = MeasureLib.measure(
+                (cropped_sr_img * 255).astype("uint8"), 
+                (cropped_gt_img * 255).astype("uint8"),
+            )
             test_results['psnr'].append(psnr)
             test_results['ssim'].append(ssim)
+            test_results['lpips'].append(lpips)
 
             if gt_img.shape[2] == 3:  # RGB image
                 sr_img_y = bgr2ycbcr(sr_img, only_y=True)
@@ -103,11 +115,12 @@ for test_loader in test_loaders:
                 ssim_y = util.calculate_ssim(cropped_sr_img_y * 255, cropped_gt_img_y * 255)
                 test_results['psnr_y'].append(psnr_y)
                 test_results['ssim_y'].append(ssim_y)
+                
                 logger.info(
-                    '{:20s} - PSNR: {:.6f} dB; SSIM: {:.6f}; PSNR_Y: {:.6f} dB; SSIM_Y: {:.6f}.'.
-                    format(img_name, psnr, ssim, psnr_y, ssim_y))
+                    '{:20s} - PSNR: {:.6f} dB; SSIM: {:.6f}; LPIPS: {:.6f}; PSNR_Y: {:.6f} dB; SSIM_Y: {:.6f}.'.
+                    format(img_name, psnr, ssim, lpips, psnr_y, ssim_y))
             else:
-                logger.info('{:20s} - PSNR: {:.6f} dB; SSIM: {:.6f}.'.format(img_name, psnr, ssim))
+                logger.info('{:20s} - PSNR: {:.6f} dB; SSIM: {:.6f}; LPIPS: {:.6f}.'.format(img_name, psnr, ssim, lpips))
         else:
             logger.info(img_name)
 
@@ -118,9 +131,11 @@ for test_loader in test_loaders:
         # Average PSNR/SSIM results
         ave_psnr = sum(test_results['psnr']) / len(test_results['psnr'])
         ave_ssim = sum(test_results['ssim']) / len(test_results['ssim'])
+        ave_lpips = sum(test_results['lpips']) / len(test_results['lpips'])
         logger.info(
-            '----Average PSNR/SSIM results for {}----\n\tPSNR: {:.6f} dB; SSIM: {:.6f}\n'.format(
-                test_set_name, ave_psnr, ave_ssim))
+            '----Average PSNR/SSIM results for {}----\n\tPSNR: {:.6f} dB; SSIM: {:.6f}; LPIPS: {:.6f}\n'.format(
+                test_set_name, ave_psnr, ave_ssim, ave_lpips))
+        
         if test_results['psnr_y'] and test_results['ssim_y']:
             ave_psnr_y = sum(test_results['psnr_y']) / len(test_results['psnr_y'])
             ave_ssim_y = sum(test_results['ssim_y']) / len(test_results['ssim_y'])

@@ -29,6 +29,11 @@ def main():
     #### options
     parser = argparse.ArgumentParser()
     parser.add_argument('-opt', type=str, help='Path to option YMAL file.')
+    parser.add_argument(
+        '--model_path', type=str, default=None, required=False,
+        help='Path to a pre-trained model, from which we initialize our model for '
+             'training.'
+    )
     parser.add_argument('--launcher', choices=['none', 'pytorch'], default='none',
                         help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
@@ -133,6 +138,27 @@ def main():
 
     #### create model
     model = create_model(opt)
+
+    # Load model weights
+    if args.model_path is not None:
+        assert resume_state is None
+        state_dict = torch.load(args.model_path, map_location=model.device)
+
+        model_to_load = model.netG
+        if hasattr(model_to_load, "module"):
+            model_to_load = model_to_load.module
+
+        # Handle unexpected keys
+        model_keys = set(model_to_load.state_dict().keys())
+        state_dict_keys = set(state_dict.keys())
+        unexpected_keys = state_dict_keys - model_keys
+        if len(unexpected_keys) > 0:
+            logger.warn(f"Unexpected key(s) in state_dict: {list(unexpected_keys)}")
+            for key in unexpected_keys:
+                del state_dict[key]
+
+        model_to_load.load_state_dict(state_dict, strict=True)
+        logger.info(f"Successfully loaded state dict from {args.model_path}")
 
     #### resume training
     if resume_state:

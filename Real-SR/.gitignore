@@ -5,6 +5,8 @@
 # Custom
 tb_logger/
 figures/
+experiments/
+results/
 
 # IntelliJ project files
 .idea
